@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 using AudioDeviceManager.Models;
@@ -12,6 +13,7 @@ public partial class MainWindow : Window
 {
     private readonly AudioDeviceService _audioDeviceService = new();
     private readonly DispatcherTimer _refreshTimer;
+    private bool _isDarkTheme;
     private bool _isUpdatingPlaybackControls;
     private bool _isUpdatingRecordingControls;
 
@@ -35,6 +37,7 @@ public partial class MainWindow : Window
             "Couldn't refresh the device list.");
         _refreshTimer.Start();
 
+        ApplyTheme();
         RunSafely(() => RefreshDevices(), "Couldn't load audio devices.");
     }
 
@@ -48,6 +51,12 @@ public partial class MainWindow : Window
     private void RefreshButton_OnClick(object sender, RoutedEventArgs e)
     {
         RunSafely(() => RefreshDevices(), "Couldn't refresh the device list.");
+    }
+
+    private void ToggleThemeButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        _isDarkTheme = !_isDarkTheme;
+        ApplyTheme();
     }
 
     private void RefreshDevices(bool keepSelections = false)
@@ -240,5 +249,47 @@ public partial class MainWindow : Window
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
+    }
+
+    private void ApplyTheme()
+    {
+        var resources = Application.Current.Resources;
+
+        if (_isDarkTheme)
+        {
+            ToggleThemeButton.Content = "Light Theme";
+            SetBrush(resources, "WindowBackgroundBrush", "#FF0F172A");
+            SetBrush(resources, "SurfaceBrush", "#FF111827");
+            SetBrush(resources, "SurfaceMutedBrush", "#FF1F2937");
+            SetBrush(resources, "PrimaryTextBrush", "#FFF8FAFC");
+            SetBrush(resources, "SecondaryTextBrush", "#FF94A3B8");
+            SetBrush(resources, "AccentBrush", "#FF38BDF8");
+            SetBrush(resources, "AccentBorderBrush", "#FF38BDF8");
+            SetBrush(resources, "SuccessBrush", "#FF10B981");
+            SetBrush(resources, "SuccessBorderBrush", "#FF10B981");
+            SetBrush(resources, "ControlForegroundBrush", "#FFE5EEF8");
+            SetBrush(resources, "ListBackgroundBrush", "#FF0B1220");
+            SetBrush(resources, "StatusBarBrush", "#FF111827");
+            return;
+        }
+
+        ToggleThemeButton.Content = "Dark Theme";
+        SetBrush(resources, "WindowBackgroundBrush", "#FFF3F6FA");
+        SetBrush(resources, "SurfaceBrush", "#FFFFFFFF");
+        SetBrush(resources, "SurfaceMutedBrush", "#FFF7F9FC");
+        SetBrush(resources, "PrimaryTextBrush", "#FF132238");
+        SetBrush(resources, "SecondaryTextBrush", "#FF536273");
+        SetBrush(resources, "AccentBrush", "#FF1E6FD9");
+        SetBrush(resources, "AccentBorderBrush", "#FF1E6FD9");
+        SetBrush(resources, "SuccessBrush", "#FF0C8A60");
+        SetBrush(resources, "SuccessBorderBrush", "#FF0C8A60");
+        SetBrush(resources, "ControlForegroundBrush", "#FF132238");
+        SetBrush(resources, "ListBackgroundBrush", "#FFFFFFFF");
+        SetBrush(resources, "StatusBarBrush", "#FFFFFFFF");
+    }
+
+    private static void SetBrush(ResourceDictionary resources, string key, string colorCode)
+    {
+        resources[key] = new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorCode));
     }
 }

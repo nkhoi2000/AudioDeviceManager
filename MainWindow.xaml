@@ -10,7 +10,7 @@
         MinHeight="580"
         MinWidth="960"
         WindowStartupLocation="CenterScreen">
-    <Grid Background="#FFF3F6FA">
+    <Grid Background="{DynamicResource WindowBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -19,31 +19,43 @@
 
         <Border Margin="24"
                 Padding="24"
-                Background="White"
+                Background="{DynamicResource SurfaceBrush}"
                 CornerRadius="16">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <StackPanel>
                     <TextBlock FontSize="28"
                                FontWeight="SemiBold"
-                               Foreground="#FF132238"
+                               Foreground="{DynamicResource PrimaryTextBrush}"
                                Text="Manage audio devices on this PC" />
                     <TextBlock Margin="0,8,0,0"
                                FontSize="15"
-                               Foreground="#FF536273"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                Text="Browse active input and output devices, switch the default device, and adjust volume." />
                 </StackPanel>
 
-                <Button Grid.Column="1"
+                <Button x:Name="ToggleThemeButton"
+                        Grid.Column="1"
+                        MinWidth="120"
+                        Margin="0,0,12,0"
+                        Padding="18,10"
+                        Background="{DynamicResource SurfaceMutedBrush}"
+                        Foreground="{DynamicResource ControlForegroundBrush}"
+                        BorderBrush="{DynamicResource AccentBorderBrush}"
+                        Click="ToggleThemeButton_OnClick"
+                        Content="Dark Theme" />
+
+                <Button Grid.Column="2"
                         MinWidth="120"
                         Padding="18,10"
-                        Background="#FF1E6FD9"
+                        Background="{DynamicResource AccentBrush}"
                         Foreground="White"
-                        BorderBrush="#FF1E6FD9"
+                        BorderBrush="{DynamicResource AccentBorderBrush}"
                         Click="RefreshButton_OnClick"
                         Content="Refresh" />
             </Grid>
@@ -58,7 +70,7 @@
             <Border Grid.Column="0"
                     Margin="0,0,12,0"
                     Padding="20"
-                    Background="White"
+                    Background="{DynamicResource SurfaceBrush}"
                     CornerRadius="16">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -69,10 +81,10 @@
                     <StackPanel Margin="0,0,0,16">
                         <TextBlock FontSize="22"
                                    FontWeight="SemiBold"
-                                   Foreground="#FF132238"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
                                    Text="Sound Output" />
                         <TextBlock Margin="0,6,0,0"
-                                   Foreground="#FF536273"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="Active playback devices connected to this machine." />
                     </StackPanel>
 
@@ -83,6 +95,9 @@
                         </Grid.RowDefinitions>
 
                         <ListBox x:Name="PlaybackDevicesListBox"
+                                 Background="{DynamicResource ListBackgroundBrush}"
+                                 Foreground="{DynamicResource ControlForegroundBrush}"
+                                 BorderBrush="{DynamicResource SecondaryTextBrush}"
                                  DisplayMemberPath="Summary"
                                  SelectionChanged="PlaybackDevicesListBox_OnSelectionChanged" />
 
@@ -90,15 +105,15 @@
                             <TextBlock x:Name="PlaybackSelectedName"
                                        FontSize="16"
                                        FontWeight="SemiBold"
-                                       Foreground="#FF132238"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
                                        Text="No device selected" />
                             <TextBlock x:Name="PlaybackStatusText"
                                        Margin="0,4,0,0"
-                                       Foreground="#FF536273"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
                                        Text="Status: -" />
                             <TextBlock x:Name="PlaybackVolumeText"
                                        Margin="0,12,0,6"
-                                       Foreground="#FF132238"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
                                        Text="Volume: 0%" />
                             <Slider x:Name="PlaybackVolumeSlider"
                                     Minimum="0"
@@ -109,13 +124,14 @@
                                 <Button MinWidth="160"
                                         Margin="0,0,12,0"
                                         Padding="16,8"
-                                        Background="#FF0C8A60"
+                                        Background="{DynamicResource SuccessBrush}"
                                         Foreground="White"
-                                        BorderBrush="#FF0C8A60"
+                                        BorderBrush="{DynamicResource SuccessBorderBrush}"
                                         Click="SetPlaybackDefaultButton_OnClick"
                                         Content="Set as Default" />
                                 <CheckBox x:Name="PlaybackMuteCheckBox"
                                           VerticalAlignment="Center"
+                                          Foreground="{DynamicResource ControlForegroundBrush}"
                                           IsEnabled="False"
                                           Checked="PlaybackMuteCheckBox_OnChanged"
                                           Unchecked="PlaybackMuteCheckBox_OnChanged"
@@ -129,7 +145,7 @@
             <Border Grid.Column="1"
                     Margin="12,0,0,0"
                     Padding="20"
-                    Background="White"
+                    Background="{DynamicResource SurfaceBrush}"
                     CornerRadius="16">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -140,10 +156,10 @@
                     <StackPanel Margin="0,0,0,16">
                         <TextBlock FontSize="22"
                                    FontWeight="SemiBold"
-                                   Foreground="#FF132238"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
                                    Text="Sound Input" />
                         <TextBlock Margin="0,6,0,0"
-                                   Foreground="#FF536273"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="Active microphones and recording devices connected to this machine." />
                     </StackPanel>
 
@@ -154,6 +170,9 @@
                         </Grid.RowDefinitions>
 
                         <ListBox x:Name="RecordingDevicesListBox"
+                                 Background="{DynamicResource ListBackgroundBrush}"
+                                 Foreground="{DynamicResource ControlForegroundBrush}"
+                                 BorderBrush="{DynamicResource SecondaryTextBrush}"
                                  DisplayMemberPath="Summary"
                                  SelectionChanged="RecordingDevicesListBox_OnSelectionChanged" />
 
@@ -161,15 +180,15 @@
                             <TextBlock x:Name="RecordingSelectedName"
                                        FontSize="16"
                                        FontWeight="SemiBold"
-                                       Foreground="#FF132238"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
                                        Text="No device selected" />
                             <TextBlock x:Name="RecordingStatusText"
                                        Margin="0,4,0,0"
-                                       Foreground="#FF536273"
+                                       Foreground="{DynamicResource SecondaryTextBrush}"
                                        Text="Status: -" />
                             <TextBlock x:Name="RecordingVolumeText"
                                        Margin="0,12,0,6"
-                                       Foreground="#FF132238"
+                                       Foreground="{DynamicResource PrimaryTextBrush}"
                                        Text="Volume: 0%" />
                             <Slider x:Name="RecordingVolumeSlider"
                                     Minimum="0"
@@ -180,13 +199,14 @@
                                 <Button MinWidth="160"
                                         Margin="0,0,12,0"
                                         Padding="16,8"
-                                        Background="#FF0C8A60"
+                                        Background="{DynamicResource SuccessBrush}"
                                         Foreground="White"
-                                        BorderBrush="#FF0C8A60"
+                                        BorderBrush="{DynamicResource SuccessBorderBrush}"
                                         Click="SetRecordingDefaultButton_OnClick"
                                         Content="Set as Default" />
                                 <CheckBox x:Name="RecordingMuteCheckBox"
                                           VerticalAlignment="Center"
+                                          Foreground="{DynamicResource ControlForegroundBrush}"
                                           IsEnabled="False"
                                           Checked="RecordingMuteCheckBox_OnChanged"
                                           Unchecked="RecordingMuteCheckBox_OnChanged"
@@ -198,9 +218,11 @@
             </Border>
         </Grid>
 
-        <StatusBar Grid.Row="2" Background="White">
+        <StatusBar Grid.Row="2" Background="{DynamicResource StatusBarBrush}">
             <StatusBarItem>
-                <TextBlock x:Name="LastRefreshTextBlock" Text="Device list has not been refreshed yet." />
+                <TextBlock x:Name="LastRefreshTextBlock"
+                           Foreground="{DynamicResource ControlForegroundBrush}"
+                           Text="Device list has not been refreshed yet." />
             </StatusBarItem>
         </StatusBar>
     </Grid>
