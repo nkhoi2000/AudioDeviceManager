@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Audio Device Manager"
+        Icon="Assets/AppIcon.ico"
         Height="640"
         Width="1080"
         MinHeight="580"
