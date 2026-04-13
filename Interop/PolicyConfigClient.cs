@@ -8,15 +8,15 @@ internal sealed class PolicyConfigClient
 {
     public void SetDefaultDevice(string deviceId)
     {
-        var policyConfigType = Type.GetTypeFromCLSID(typeof(PolicyConfig).GUID)
+        var policyConfigType = Type.GetTypeFromCLSID(typeof(PolicyConfigVistaClient).GUID)
                                ?? throw new InvalidOperationException("Couldn't create the Windows PolicyConfig COM object.");
-        var policyConfig = (IPolicyConfig)Activator.CreateInstance(policyConfigType)!;
+        var policyConfig = (IPolicyConfigVista)Activator.CreateInstance(policyConfigType)!;
 
         try
         {
-            policyConfig.SetDefaultEndpoint(deviceId, Role.Console);
-            policyConfig.SetDefaultEndpoint(deviceId, Role.Multimedia);
-            policyConfig.SetDefaultEndpoint(deviceId, Role.Communications);
+            Marshal.ThrowExceptionForHR(policyConfig.SetDefaultEndpoint(deviceId, Role.Console));
+            Marshal.ThrowExceptionForHR(policyConfig.SetDefaultEndpoint(deviceId, Role.Multimedia));
+            Marshal.ThrowExceptionForHR(policyConfig.SetDefaultEndpoint(deviceId, Role.Communications));
         }
         finally
         {
@@ -26,37 +26,63 @@ internal sealed class PolicyConfigClient
 }
 
 [ComImport]
-[Guid("870af99c-171d-4f9e-af0d-e63df40c2bc9")]
+[Guid("568B9108-44BF-40B4-9006-86AFE5B5A620")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-internal interface IPolicyConfig
+internal interface IPolicyConfigVista
 {
-    int GetMixFormat();
+    int GetMixFormat(
+        [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
+        out IntPtr mixFormat);
 
-    int GetDeviceFormat();
+    int GetDeviceFormat(
+        [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
+        [MarshalAs(UnmanagedType.Bool)] bool defaultFormat,
+        out IntPtr deviceFormat);
 
-    int SetDeviceFormat();
+    int SetDeviceFormat(
+        [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
+        IntPtr endpointFormat,
+        IntPtr mixFormat);
 
-    int GetProcessingPeriod();
+    int GetProcessingPeriod(
+        [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
+        [MarshalAs(UnmanagedType.Bool)] bool defaultPeriod,
+        out long defaultDevicePeriod,
+        out long minimumDevicePeriod);
 
-    int SetProcessingPeriod();
+    int SetProcessingPeriod(
+        [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
+        ref long devicePeriod);
 
-    int GetShareMode();
+    int GetShareMode(
+        [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
+        out IntPtr mode);
 
-    int SetShareMode();
+    int SetShareMode(
+        [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
+        IntPtr mode);
 
-    int GetPropertyValue();
+    int GetPropertyValue(
+        [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
+        IntPtr propertyKey,
+        out IntPtr propertyValue);
 
-    int SetPropertyValue();
+    int SetPropertyValue(
+        [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
+        IntPtr propertyKey,
+        IntPtr propertyValue);
 
     [PreserveSig]
     int SetDefaultEndpoint([MarshalAs(UnmanagedType.LPWStr)] string wszDeviceId, Role role);
 
-    int SetEndpointVisibility();
+    int SetEndpointVisibility(
+        [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
+        [MarshalAs(UnmanagedType.Bool)] bool visible);
 }
 
 [ComImport]
 [Guid("294935CE-F637-4E7C-A41B-AB255460B862")]
 [ClassInterface(ClassInterfaceType.None)]
-internal sealed class PolicyConfig
+internal sealed class PolicyConfigVistaClient
 {
 }
