@@ -6,3 +6,4 @@ obj/
 *.userosscache
 *.rsuser
 *.pdb
+Installer/Output/
