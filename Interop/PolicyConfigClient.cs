@@ -27,32 +27,15 @@ internal sealed class PolicyConfigClient
 
     private static bool TrySetDefaultWithPolicyConfig(string deviceId, out Exception? error)
     {
-        return TrySetDefaultDevice(
-            deviceId,
-            () => CreateComInstance<IPolicyConfig>(typeof(PolicyConfigClientComObject).GUID),
-            out error);
-    }
-
-    private static bool TrySetDefaultWithPolicyConfigVista(string deviceId, out Exception? error)
-    {
-        return TrySetDefaultDevice(
-            deviceId,
-            () => CreateComInstance<IPolicyConfigVista>(typeof(PolicyConfigVistaClient).GUID),
-            out error);
-    }
-
-    private static bool TrySetDefaultDevice<TPolicyConfig>(
-        string deviceId,
-        Func<TPolicyConfig> factory,
-        out Exception? error)
-        where TPolicyConfig : class, IPolicyConfigApi
-    {
-        TPolicyConfig? policyConfig = null;
+        IPolicyConfig? policyConfig = null;
 
         try
         {
-            policyConfig = factory();
-            SetDefaultEndpoints(policyConfig, deviceId);
+            var policyConfigType = Type.GetTypeFromCLSID(typeof(PolicyConfigClientComObject).GUID)
+                                   ?? throw new InvalidOperationException("Couldn't create the PolicyConfig COM object.");
+            policyConfig = (IPolicyConfig)Activator.CreateInstance(policyConfigType)!;
+
+            SetDefaultEndpoints(deviceId, policyConfig.SetDefaultEndpoint);
             error = null;
             return true;
         }
@@ -63,39 +46,55 @@ internal sealed class PolicyConfigClient
         }
         finally
         {
-            if (policyConfig is not null && Marshal.IsComObject(policyConfig))
-            {
-                Marshal.ReleaseComObject(policyConfig);
-            }
+            ReleaseComObject(policyConfig);
         }
     }
 
-    private static TPolicyConfig CreateComInstance<TPolicyConfig>(Guid classId)
-        where TPolicyConfig : class
+    private static bool TrySetDefaultWithPolicyConfigVista(string deviceId, out Exception? error)
     {
-        var policyConfigType = Type.GetTypeFromCLSID(classId)
-                               ?? throw new InvalidOperationException("Couldn't create the Windows PolicyConfig COM object.");
+        IPolicyConfigVista? policyConfig = null;
 
-        return (TPolicyConfig)Activator.CreateInstance(policyConfigType)!;
+        try
+        {
+            var policyConfigType = Type.GetTypeFromCLSID(typeof(PolicyConfigVistaClient).GUID)
+                                   ?? throw new InvalidOperationException("Couldn't create the PolicyConfigVista COM object.");
+            policyConfig = (IPolicyConfigVista)Activator.CreateInstance(policyConfigType)!;
+
+            SetDefaultEndpoints(deviceId, policyConfig.SetDefaultEndpoint);
+            error = null;
+            return true;
+        }
+        catch (Exception exception)
+        {
+            error = exception;
+            return false;
+        }
+        finally
+        {
+            ReleaseComObject(policyConfig);
+        }
     }
 
-    private static void SetDefaultEndpoints(IPolicyConfigApi policyConfig, string deviceId)
+    private static void SetDefaultEndpoints(string deviceId, Func<string, Role, int> setDefaultEndpoint)
     {
-        Marshal.ThrowExceptionForHR(policyConfig.SetDefaultEndpoint(deviceId, Role.Console));
-        Marshal.ThrowExceptionForHR(policyConfig.SetDefaultEndpoint(deviceId, Role.Multimedia));
-        Marshal.ThrowExceptionForHR(policyConfig.SetDefaultEndpoint(deviceId, Role.Communications));
+        Marshal.ThrowExceptionForHR(setDefaultEndpoint(deviceId, Role.Console));
+        Marshal.ThrowExceptionForHR(setDefaultEndpoint(deviceId, Role.Multimedia));
+        Marshal.ThrowExceptionForHR(setDefaultEndpoint(deviceId, Role.Communications));
     }
-}
 
-internal interface IPolicyConfigApi
-{
-    int SetDefaultEndpoint(string deviceId, Role role);
+    private static void ReleaseComObject(object? instance)
+    {
+        if (instance is not null && Marshal.IsComObject(instance))
+        {
+            Marshal.ReleaseComObject(instance);
+        }
+    }
 }
 
 [ComImport]
 [Guid("F8679F50-850A-41CF-9C72-430F290290C8")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-internal interface IPolicyConfig : IPolicyConfigApi
+internal interface IPolicyConfig
 {
     int GetMixFormat(
         [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
@@ -143,7 +142,7 @@ internal interface IPolicyConfig : IPolicyConfigApi
         IntPtr propertyValue);
 
     [PreserveSig]
-    new int SetDefaultEndpoint([MarshalAs(UnmanagedType.LPWStr)] string deviceId, Role role);
+    int SetDefaultEndpoint([MarshalAs(UnmanagedType.LPWStr)] string deviceId, Role role);
 
     int SetEndpointVisibility(
         [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
@@ -160,7 +159,7 @@ internal sealed class PolicyConfigClientComObject
 [ComImport]
 [Guid("568B9108-44BF-40B4-9006-86AFE5B5A620")]
 [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-internal interface IPolicyConfigVista : IPolicyConfigApi
+internal interface IPolicyConfigVista
 {
     int GetMixFormat(
         [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
@@ -205,7 +204,7 @@ internal interface IPolicyConfigVista : IPolicyConfigApi
         IntPtr propertyValue);
 
     [PreserveSig]
-    new int SetDefaultEndpoint([MarshalAs(UnmanagedType.LPWStr)] string deviceId, Role role);
+    int SetDefaultEndpoint([MarshalAs(UnmanagedType.LPWStr)] string deviceId, Role role);
 
     int SetEndpointVisibility(
         [MarshalAs(UnmanagedType.LPWStr)] string deviceId,
